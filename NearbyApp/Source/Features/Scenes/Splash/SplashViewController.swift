@@ -10,11 +10,11 @@ import UIKit
 
 class SplashViewController: UIViewController {
     let contentView: SplashView
-    let logoImageView           = UIImageView()
-    let backgroundImageView     = UIImageView()
+    weak var delegate: SplashFlowDelegate?
     
-    init(contentView: SplashView) {
+    init(contentView: SplashView, delegate: SplashFlowDelegate) {
         self.contentView        = SplashView()
+        self.delegate = delegate
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -24,15 +24,20 @@ class SplashViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        decideFlow()
         configure()
         configureContentView()
-        configureLogoImageView()
-        configureBackgroundImageView()
     }
     
     private func configure() {
         self.navigationController?.navigationBar.isHidden = true
         self.view.backgroundColor           = Colors.greenLight
+    }
+    
+    private func decideFlow() {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { [weak self] in
+            self?.delegate?.decideNavigationFlow()
+        }
     }
     
     func configureContentView() {
@@ -44,31 +49,6 @@ class SplashViewController: UIViewController {
             contentView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
             contentView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor),
             contentView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
-        ])
-    }
-    
-    func configureBackgroundImageView() {
-        self.view.addSubview(backgroundImageView)
-        backgroundImageView.image           = UIImage(named: Images.splashBG)
-        backgroundImageView.contentMode     = .scaleAspectFit
-        backgroundImageView.translatesAutoresizingMaskIntoConstraints = false
-        
-        NSLayoutConstraint.activate([
-            backgroundImageView.bottomAnchor.constraint(equalTo: self.view.bottomAnchor),
-            backgroundImageView.leadingAnchor.constraint(equalTo: self.view.leadingAnchor),
-            backgroundImageView.trailingAnchor.constraint(equalTo: self.view.trailingAnchor)
-        ])
-    }
-    
-    func configureLogoImageView() {
-        self.view.addSubview(logoImageView)
-        logoImageView.image                 = UIImage(named: Images.logo)
-        logoImageView.contentMode           = .scaleAspectFit
-        logoImageView.translatesAutoresizingMaskIntoConstraints = false
-        
-        NSLayoutConstraint.activate([
-            logoImageView.centerXAnchor.constraint(equalTo: self.view.centerXAnchor),
-            logoImageView.centerYAnchor.constraint(equalTo: self.view.centerYAnchor),
         ])
     }
 }

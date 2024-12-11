@@ -23,24 +23,28 @@ class TipsView: UIView {
         configureIconImageView()
         configureTitleLabel()
         configureBodyLabel()
-        configureConstraints()
         configureComponent(icon: icon, title: title, description: description)
+        configureConstraints()
     }
     
     
     func configureIconImageView() {
         self.addSubview(iconImageView)
         iconImageView.contentMode                   = .scaleAspectFit
+        iconImageView.tintColor                     = .systemRed
         iconImageView.translatesAutoresizingMaskIntoConstraints = false
     }
     
     func configureTitleLabel() {
         self.addSubview(titleLabel)
+        titleLabel.font                             = Typography.titleSM
         titleLabel.translatesAutoresizingMaskIntoConstraints = false
     }
     
     func configureBodyLabel() {
         self.addSubview(bodyLabel)
+        bodyLabel.numberOfLines = 0
+        bodyLabel.font          = Typography.textSM
         bodyLabel.translatesAutoresizingMaskIntoConstraints = false
     }
     
@@ -52,12 +56,12 @@ class TipsView: UIView {
     
     func configureConstraints() {
         NSLayoutConstraint.activate([
-            iconImageView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
-            iconImageView.topAnchor.constraint(equalTo: self.topAnchor),
+            iconImageView.topAnchor.constraint(equalTo: topAnchor),
+            iconImageView.leadingAnchor.constraint(equalTo: leadingAnchor),
             iconImageView.widthAnchor.constraint(equalToConstant: 24),
             iconImageView.heightAnchor.constraint(equalToConstant: 24),
             
-            titleLabel.leadingAnchor.constraint(equalTo: self.iconImageView.trailingAnchor, constant: 8),
+            titleLabel.leadingAnchor.constraint(equalTo: self.iconImageView.trailingAnchor, constant: 16),
             titleLabel.topAnchor.constraint(equalTo: self.iconImageView.topAnchor),
             titleLabel.trailingAnchor.constraint(equalTo: self.trailingAnchor),
             
