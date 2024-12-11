@@ -10,7 +10,7 @@ import UIKit
 
 class PlaceTableViewCell: UITableViewCell {
     
-    static var identifier = "PlaceTableCell"
+    static var identifier = "PlaceTableViewCell"
     
     let itemImage               = UIImageView()
     let itemTitleLabel          = UILabel()

@@ -9,5 +9,14 @@ import Foundation
 import UIKit
 
 class HomeViewController: UIViewController {
+    private var places: [Place] = []
+    private let homeView = HomeView()
     
+  
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        self.view = homeView
+    }
 }
+ 
