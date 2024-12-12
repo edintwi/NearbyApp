@@ -15,7 +15,7 @@ class PlaceTableViewCell: UITableViewCell {
     let itemImage               = UIImageView()
     let itemTitleLabel          = UILabel()
     let itemDescription         = UILabel()
-    let iconImageView           = UIImageView(image: UIImage(named: "ticket"))
+    let ticketIcon           = UIImageView(image: UIImage(named: "ticket"))
     let ticketCountLabel        = UILabel()
     let containerView           = UIView()
     
@@ -32,7 +32,7 @@ class PlaceTableViewCell: UITableViewCell {
         containerView.addSubview(itemImage)
         itemImage.layer.cornerRadius                        = 8
         itemImage.clipsToBounds                             = true
-        itemImage.contentMode                               = .scaleAspectFit
+        itemImage.contentMode                               = .scaleAspectFill
         itemImage.translatesAutoresizingMaskIntoConstraints = false
     }
     
@@ -45,18 +45,18 @@ class PlaceTableViewCell: UITableViewCell {
     
     private func configureItemDescription() {
         containerView.addSubview(itemDescription)
-        itemDescription.font                                      = Typography.textSM
+        itemDescription.font                                      = Typography.textXS
         itemDescription.textAlignment                             = .left
-        itemDescription.numberOfLines                             = 0
-        itemDescription.textColor                                 = Colors.gray300
+        itemDescription.numberOfLines                             = 2
+        itemDescription.textColor                                 = Colors.gray500
         itemDescription.translatesAutoresizingMaskIntoConstraints = false
     }
     
     private func configureIconImageView() {
-        containerView.addSubview(iconImageView)
-        iconImageView.contentMode                               = .scaleAspectFit
-        iconImageView.tintColor                                 = Colors.redBase
-        iconImageView.translatesAutoresizingMaskIntoConstraints = false
+        containerView.addSubview(ticketIcon)
+        ticketIcon.contentMode                               = .scaleAspectFit
+        ticketIcon.tintColor                                 = Colors.redBase
+        ticketIcon.translatesAutoresizingMaskIntoConstraints = false
     }
     
     private func configureTicketCountLabel() {
@@ -84,40 +84,52 @@ class PlaceTableViewCell: UITableViewCell {
         configureConstraints()
     }
     
-    private func configure(with place: Place) {
-        itemImage.image         = UIImage(named: place.imageName)
-        itemTitleLabel.text     = place.title
+    func configure(with place: Place) {
+        if let url = URL(string: place.cover) {
+            URLSession.shared.dataTask(with: url) { data, _, _ in
+                if let data = data, let image = UIImage(data: data) {
+                    DispatchQueue.main.async {
+                        self.itemImage.image = image
+                    }
+                }
+            }.resume()
+        }
+        
+        itemTitleLabel.text     = place.name
         itemDescription.text    = place.description
-        ticketCountLabel.text   = "Cupons disponívies: \(place.tickets)"
+        ticketCountLabel.text   = "Cupons disponívies: \(place.coupons)"
     }
     
     private func configureConstraints() {
         NSLayoutConstraint.activate([
-            containerView.topAnchor.constraint(equalTo: contentView.topAnchor, constant: 8),
-            containerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor, constant: 8),
-            containerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -8),
-            containerView.bottomAnchor.constraint(equalTo: contentView.bottomAnchor, constant: -8),
+            containerView.topAnchor.constraint(equalTo: topAnchor, constant: 8),
+            containerView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 8),
+            containerView.trailingAnchor.constraint(equalTo: trailingAnchor, constant: -8),
+            containerView.bottomAnchor.constraint(equalTo: bottomAnchor, constant: -8),
             
+            itemImage.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 8),
+            itemImage.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -8),
             itemImage.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 8),
             itemImage.centerYAnchor.constraint(equalTo: containerView.centerYAnchor),
             itemImage.widthAnchor.constraint(equalToConstant: 116),
             itemImage.heightAnchor.constraint(equalToConstant: 104),
             
             itemTitleLabel.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 8),
-            itemTitleLabel.leadingAnchor.constraint(equalTo: itemImage.trailingAnchor, constant: 8),
+            itemTitleLabel.leadingAnchor.constraint(equalTo: itemImage.trailingAnchor, constant: 16),
             itemTitleLabel.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -8),
             
             itemDescription.topAnchor.constraint(equalTo: itemTitleLabel.bottomAnchor, constant: 4),
-            itemDescription.leadingAnchor.constraint(equalTo: itemImage.trailingAnchor, constant: 8),
+            itemDescription.leadingAnchor.constraint(equalTo: itemImage.trailingAnchor, constant: 16),
             itemDescription.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -8),
             
-            iconImageView.leadingAnchor.constraint(equalTo: itemImage.trailingAnchor, constant: 8),
-            iconImageView.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -8),
-            iconImageView.widthAnchor.constraint(equalToConstant: 13),
-            iconImageView.heightAnchor.constraint(equalToConstant: 11),
+            ticketIcon.leadingAnchor.constraint(equalTo: itemImage.trailingAnchor, constant: 16),
+            ticketIcon.bottomAnchor.constraint(equalTo: containerView.bottomAnchor, constant: -8),
+            ticketIcon.widthAnchor.constraint(equalToConstant: 13),
+            ticketIcon.heightAnchor.constraint(equalToConstant: 11),
             
-            ticketCountLabel.leadingAnchor.constraint(equalTo: iconImageView.trailingAnchor, constant: 4),
-            ticketCountLabel.centerYAnchor.constraint(equalTo: iconImageView.centerYAnchor),
+            ticketCountLabel.topAnchor.constraint(equalTo: itemDescription.bottomAnchor, constant: 8),
+            ticketCountLabel.leadingAnchor.constraint(equalTo: ticketIcon.trailingAnchor, constant: 4),
+            ticketCountLabel.centerYAnchor.constraint(equalTo: ticketIcon.centerYAnchor),
             
         ])
     }

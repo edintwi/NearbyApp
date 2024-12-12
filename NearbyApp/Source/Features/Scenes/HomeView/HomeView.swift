@@ -20,6 +20,10 @@ class HomeView: UIView {
     
     private var containerTopConstraints: NSLayoutConstraint!
     
+    private var filterButtonAction: ((Category) -> Void)?
+    private var categories: [Category] = []
+    private var selectedButton: UIButton?
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         configureMapView()
@@ -85,6 +89,83 @@ class HomeView: UIView {
         containerView.addSubview(placesTableView)
         placesTableView.register(PlaceTableViewCell.self, forCellReuseIdentifier: PlaceTableViewCell.identifier)
         placesTableView.translatesAutoresizingMaskIntoConstraints   = false
+    }
+    
+    func configureTableViewDelegate(_ delegate: UITableViewDelegate, dataSource: UITableViewDataSource) {
+        placesTableView.delegate = delegate
+        placesTableView.dataSource = dataSource
+    }
+    
+    private func createFilterButton(title: String, iconName: String) -> UIButton {
+        let button = UIButton(type: .system)
+
+        button.setImage(UIImage(named: iconName), for: .normal)
+        button.setTitleColor(Colors.gray600, for: .normal)
+        button.setTitle(title, for: .normal)
+        button.layer.cornerRadius                                               = 8
+        button.tintColor                                                        = Colors.gray600
+        button.backgroundColor                                                  = Colors.gray100
+        button.titleLabel?.font                                                 = Typography.textSM
+        button.imageView?.contentMode                                           = .scaleAspectFit
+        
+        button.imageEdgeInsets                                                  = UIEdgeInsets(top: 4, left: 4, bottom: 4, right: 8)
+        button.titleEdgeInsets                                                  = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 0)
+        button.heightAnchor.constraint(equalToConstant: 36).isActive            = true
+        button.imageView?.heightAnchor.constraint(equalToConstant: 13).isActive = true
+        button.imageView?.widthAnchor.constraint(equalToConstant: 13).isActive  = true
+        button.translatesAutoresizingMaskIntoConstraints                        = false
+        
+        filterStackView.isLayoutMarginsRelativeArrangement                      = true
+        filterStackView.layoutMargins                                           = UIEdgeInsets(top: 2, left: 0, bottom: 2, right: 0)
+        
+        return button
+    }
+    
+    private func updateButtonSelection(button: UIButton) {
+        if let previousButton = selectedButton {
+            previousButton.setTitleColor(Colors.gray600, for: .normal)
+            previousButton.backgroundColor          = Colors.gray100
+            previousButton.tintColor                = Colors.gray600
+        }
+        
+        button.setTitleColor(Colors.gray100, for: .normal)
+        button.backgroundColor          = Colors.greenBase
+        button.tintColor                = Colors.gray100
+        
+        selectedButton = button
+    }
+    
+    @objc func filterButtonTapped(_ sender: UIButton) {
+        let selectedCategory = categories[sender.tag]
+        updateButtonSelection(button: sender)
+        filterButtonAction?(selectedCategory)
+    }
+    
+    func updateFilterButton(with categories: [Category], action: @escaping (Category) -> Void) {
+        let categoryIcons: [String: String] = [
+            "Alimentaçao"       : "fork.knife",
+            "Compras"           : "cart",
+            "Hospedagem"        : "bed.double",
+            "Padaria"           : "cup.and.saucer",
+        ]
+        
+        self.categories         = categories
+        self.filterButtonAction = action
+        
+        for (index, category) in categories.enumerated() {
+            let iconName = categoryIcons[category.name] ?? "questionmark.circle"
+            let button = createFilterButton(title: category.name, iconName: iconName)
+            button.tag = index
+            button.addTarget(self, action: #selector(filterButtonTapped(_:)), for: .touchUpInside)
+            filterStackView.addArrangedSubview(button)
+        }
+        
+    }
+    
+    func reloadTableViewData() {
+        DispatchQueue.main.async {
+            self.placesTableView.reloadData()
+        }
     }
     
     private func configureConstraints() {
