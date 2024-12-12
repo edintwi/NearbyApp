@@ -34,6 +34,7 @@ class HomeView: UIView {
         configureFilterStackView()
         configurePlacesTableView()
         configureConstraints()
+        setupPanGesture()
     }
     
     required init?(coder: NSCoder) {
@@ -99,7 +100,7 @@ class HomeView: UIView {
     private func createFilterButton(title: String, iconName: String) -> UIButton {
         let button = UIButton(type: .system)
 
-        button.setImage(UIImage(named: iconName), for: .normal)
+        button.setImage(UIImage(systemName: iconName), for: .normal)
         button.setTitleColor(Colors.gray600, for: .normal)
         button.setTitle(title, for: .normal)
         button.layer.cornerRadius                                               = 8
@@ -111,6 +112,7 @@ class HomeView: UIView {
         button.imageEdgeInsets                                                  = UIEdgeInsets(top: 4, left: 4, bottom: 4, right: 8)
         button.titleEdgeInsets                                                  = UIEdgeInsets(top: 0, left: 8, bottom: 0, right: 0)
         button.heightAnchor.constraint(equalToConstant: 36).isActive            = true
+
         button.imageView?.heightAnchor.constraint(equalToConstant: 13).isActive = true
         button.imageView?.widthAnchor.constraint(equalToConstant: 13).isActive  = true
         button.translatesAutoresizingMaskIntoConstraints                        = false
@@ -135,6 +137,12 @@ class HomeView: UIView {
         selectedButton = button
     }
     
+    
+    private func setupPanGesture() {
+        let pantGesture         = UIPanGestureRecognizer(target: self, action: #selector(handlePanGesture(_:)))
+        containerView.addGestureRecognizer(pantGesture)
+    }
+    
     @objc func filterButtonTapped(_ sender: UIButton) {
         let selectedCategory = categories[sender.tag]
         updateButtonSelection(button: sender)
@@ -143,10 +151,11 @@ class HomeView: UIView {
     
     func updateFilterButton(with categories: [Category], action: @escaping (Category) -> Void) {
         let categoryIcons: [String: String] = [
-            "Alimentaçao"       : "fork.knife",
+            "Alimentação"       : "fork.knife",
             "Compras"           : "cart",
             "Hospedagem"        : "bed.double",
             "Padaria"           : "cup.and.saucer",
+            "Cinema"            : "tv"
         ]
         
         self.categories         = categories
@@ -167,12 +176,42 @@ class HomeView: UIView {
             self.placesTableView.reloadData()
         }
     }
+
+    @objc private func handlePanGesture(_ gesture: UIPanGestureRecognizer) {
+        let translation = gesture.translation(in: self)
+        let velocity = gesture.velocity(in: self)
+        
+        switch gesture.state {
+        case .changed:
+            let newtConstant = containerTopConstraints.constant + translation.y
+            if newtConstant <= 0 && newtConstant >= frame.height * 0.5 {
+                containerTopConstraints.constant = newtConstant
+                gesture.setTranslation(.zero, in: self)
+            }
+            
+        case .ended:
+            let halfScreenHeight = -frame.height * 0.25
+            var finalPositon: CGFloat
+            
+            if velocity.y > 0 {
+                finalPositon = 0
+            } else {
+                finalPositon = halfScreenHeight
+            }
+            
+            UIView.animate(withDuration: 0.3, animations: {
+                self.containerTopConstraints.constant = finalPositon
+                self.layoutIfNeeded()
+            })
+        default : break
+        }
+    }
     
     private func configureConstraints() {
         NSLayoutConstraint.activate([
-            filterScrollView.topAnchor.constraint(equalTo: self.topAnchor, constant: 48),
-            filterScrollView.leadingAnchor.constraint(equalTo: self.leadingAnchor, constant: 24),
-            filterScrollView.trailingAnchor.constraint(equalTo: self.trailingAnchor),
+            filterScrollView.topAnchor.constraint(equalTo: topAnchor, constant: 48),
+            filterScrollView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 24),
+            filterScrollView.trailingAnchor.constraint(equalTo: trailingAnchor),
             filterScrollView.heightAnchor.constraint(equalToConstant: 86),
             
             mapView.topAnchor.constraint(equalTo: self.topAnchor),
@@ -186,10 +225,10 @@ class HomeView: UIView {
             
             filterStackView.topAnchor.constraint(equalTo: filterScrollView.topAnchor),
             filterStackView.leadingAnchor.constraint(equalTo: filterScrollView.leadingAnchor),
-            filterStackView.trailingAnchor.constraint(equalTo: filterScrollView.trailingAnchor),
             filterStackView.bottomAnchor.constraint(equalTo: filterScrollView.bottomAnchor),
             filterStackView.heightAnchor.constraint(equalTo: filterScrollView.heightAnchor),
-            filterStackView.widthAnchor.constraint(equalTo: filterScrollView.widthAnchor),
+            filterStackView.trailingAnchor.constraint(equalTo: filterScrollView.trailingAnchor),
+
         ])
         
         containerTopConstraints = containerView.topAnchor.constraint(equalTo: mapView.bottomAnchor, constant: -16)

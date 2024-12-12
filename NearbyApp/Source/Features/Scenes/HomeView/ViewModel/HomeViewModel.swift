@@ -15,12 +15,14 @@ class HomeViewModel {
     
     var places: [Place] = []
     var filteredPlaces: [Place] = []
+    var categories: [Category] = []
     
     var didUpdateCategorys: (() -> Void)?
     var didUpdatePlaces: (() -> Void)?
     
     func fetchInitalData(completion: @escaping ([Category]) -> Void) {
         fetchCategorys(completion: { categories in
+            completion(categories)
             if let foodCategory = categories.first(where: { $0.name == "Alimentação" }) {
                 self.fetchPlaces(for: foodCategory.id, userLocation: CLLocationCoordinate2D(latitude: self.userLatitude, longitude: self.userLongitude))
             }
