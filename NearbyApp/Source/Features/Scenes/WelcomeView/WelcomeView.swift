@@ -16,6 +16,8 @@ class WelcomeView: UIView {
     private let tipsStackView       = UIStackView()
     private let startButton         = UIButton()
     
+    var didTapButton: (() -> Void?)?
+    
     override init(frame: CGRect) {
         super.init(frame: frame)
         backgroundColor = .systemBackground
@@ -85,7 +87,12 @@ class WelcomeView: UIView {
         startButton.layer.cornerRadius      = 8
         startButton.backgroundColor         = Colors.greenBase
         startButton.setTitleColor(Colors.gray100, for: .normal)
+        startButton.addTarget(self, action: #selector(didTap), for: .touchUpInside)
         startButton.translatesAutoresizingMaskIntoConstraints = false
+    }
+    
+    @objc private func didTap() {
+        didTapButton?()
     }
     
     private func configureConstraints() {

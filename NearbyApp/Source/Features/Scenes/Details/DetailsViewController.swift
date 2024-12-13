@@ -201,6 +201,72 @@ class DetailsViewController: UIViewController {
         
     }
     
+   
+    
+    private func setupBackButton() {
+        view.addSubview(backButton)
+        backButton.layer.cornerRadius = 10
+        backButton.addTarget(self, action: #selector(didTapButton), for: .touchUpInside)
+        
+        backButton.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            backButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
+            backButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+            backButton.heightAnchor.constraint(equalToConstant: 40),
+            backButton.widthAnchor.constraint(equalToConstant: 40),
+        ])
+    }
+    
+    @objc func didTapButton() {
+        self.navigationController?.popViewController(animated: true)
+    }
+    
+    private func configureDetails() {
+        guard let place = place else { return }
+        titleLabel.text = place.name
+        descriptionLabel.text = place.description
+        
+        infoStackView.addArrangedSubview(createInfoRow(iconName: "ticket", text: "Cupons disponíveis: \(place.coupons)"))
+        infoStackView.addArrangedSubview(createInfoRow(iconName: "mapIcon", text: "\(place.address)"))
+        infoStackView.addArrangedSubview(createInfoRow(iconName: "phone", text: "\(place.phone)"))
+        
+        regulationLabel.text = """
+        • Válido apenas para consumo no local
+        • Disponível até 31/12/2024
+        """
+        couponCodeLabel.text = place.id
+        
+        if let url = URL(string: place.cover) {
+            URLSession.shared.dataTask(with: url) { data, _, _ in
+                if let data = data {
+                    DispatchQueue.main.async {
+                        self.coverImageView.image = UIImage(data: data)
+                    }
+                }
+            }.resume()
+        }
+    }
+    
+    private func createInfoRow(iconName: String, text: String) -> UIStackView {
+        let iconImageView = UIImageView(image: UIImage(named: iconName))
+        iconImageView.contentMode = .scaleAspectFit
+        iconImageView.tintColor = Colors.gray500
+        iconImageView.translatesAutoresizingMaskIntoConstraints = false
+        iconImageView.widthAnchor.constraint(equalToConstant: 20).isActive = true
+        iconImageView.heightAnchor.constraint(equalToConstant: 20).isActive = true
+        
+        let label = UILabel()
+        label.text = text
+        label.font = Typography.textSM
+        label.textColor = .darkGray
+        
+        let stackView = UIStackView(arrangedSubviews: [iconImageView, label])
+        stackView.axis = .horizontal
+        stackView.spacing = 8
+        
+        return stackView
+    }
+    
     private func setupConstraints() {
         NSLayoutConstraint.activate([
             scrollView.topAnchor.constraint(equalTo: view.topAnchor),
@@ -212,7 +278,6 @@ class DetailsViewController: UIViewController {
             contentView.leadingAnchor.constraint(equalTo: scrollView.leadingAnchor),
             contentView.trailingAnchor.constraint(equalTo: scrollView.trailingAnchor),
             contentView.bottomAnchor.constraint(equalTo: scrollView.bottomAnchor),
-            contentView.heightAnchor.constraint(equalTo: scrollView.heightAnchor),
             contentView.widthAnchor.constraint(equalTo: scrollView.widthAnchor),
             
             coverImageView.topAnchor.constraint(equalTo: view.topAnchor),
@@ -220,15 +285,15 @@ class DetailsViewController: UIViewController {
             coverImageView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             coverImageView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             
-            containerView.topAnchor.constraint(equalTo: coverImageView.bottomAnchor, constant: 32),
+            containerView.topAnchor.constraint(equalTo: coverImageView.bottomAnchor, constant: -20),
             containerView.leadingAnchor.constraint(equalTo: contentView.leadingAnchor),
             containerView.trailingAnchor.constraint(equalTo: contentView.trailingAnchor),
             containerView.bottomAnchor.constraint(equalTo: view.bottomAnchor),
             
             titleLabel.topAnchor.constraint(equalTo: containerView.topAnchor, constant: 32),
+            titleLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 24),
             
             descriptionLabel.topAnchor.constraint(equalTo: titleLabel.bottomAnchor, constant: 12),
-            
             infoTitleLabel.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: 24),
             infoTitleLabel.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 24),
             
@@ -270,69 +335,5 @@ class DetailsViewController: UIViewController {
             view.leadingAnchor.constraint(equalTo: containerView.leadingAnchor, constant: 24),
             view.trailingAnchor.constraint(equalTo: containerView.trailingAnchor, constant: -24),
         ])
-    }
-    
-    private func setupBackButton() {
-        view.addSubview(backButton)
-        backButton.layer.cornerRadius = 10
-        backButton.addTarget(self, action: #selector(didTapButton), for: .touchUpInside)
-        
-        backButton.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            backButton.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor, constant: 16),
-            backButton.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-            backButton.heightAnchor.constraint(equalToConstant: 40),
-            backButton.widthAnchor.constraint(equalToConstant: 40),
-        ])
-    }
-    
-    @objc func didTapButton() {
-        self.navigationController?.popViewController(animated: true)
-    }
-    
-    private func configureDetails() {
-        guard let place = place else { return }
-        titleLabel.text = place.name
-        descriptionLabel.text = place.description
-        
-        infoStackView.addArrangedSubview(createInfoRow(iconName: "ticket", text: "\(place.coupons)"))
-        infoStackView.addArrangedSubview(createInfoRow(iconName: "mapIcon", text: "\(place.address)"))
-        infoStackView.addArrangedSubview(createInfoRow(iconName: "phone", text: "\(place.phone)"))
-        
-        regulationLabel.text = """
-        • Válido apenas para consumo no local
-        • Disponível até 31/12/2024
-        """
-        couponCodeLabel.text = place.id
-        
-        if let url = URL(string: place.cover) {
-            URLSession.shared.dataTask(with: url) { data, _, _ in
-                if let data = data {
-                    DispatchQueue.main.async {
-                        self.coverImageView.image = UIImage(data: data)
-                    }
-                }
-            }
-        }
-    }
-    
-    private func createInfoRow(iconName: String, text: String) -> UIStackView {
-        let iconImageView = UIImageView(image: UIImage(named: iconName))
-        iconImageView.contentMode = .scaleAspectFit
-        iconImageView.tintColor = Colors.gray500
-        iconImageView.translatesAutoresizingMaskIntoConstraints = false
-        iconImageView.widthAnchor.constraint(equalToConstant: 20).isActive = true
-        iconImageView.heightAnchor.constraint(equalToConstant: 20).isActive = true
-        
-        let label = UILabel()
-        label.text = text
-        label.font = Typography.textSM
-        label.textColor = .darkGray
-        
-        let stackView = UIStackView(arrangedSubviews: [iconImageView, label])
-        stackView.axis = .horizontal
-        stackView.spacing = 8
-        
-        return stackView
     }
 }

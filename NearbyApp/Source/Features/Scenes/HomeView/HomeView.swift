@@ -116,10 +116,6 @@ class HomeView: UIView {
         button.imageView?.heightAnchor.constraint(equalToConstant: 13).isActive = true
         button.imageView?.widthAnchor.constraint(equalToConstant: 13).isActive  = true
         button.translatesAutoresizingMaskIntoConstraints                        = false
-        
-        filterStackView.isLayoutMarginsRelativeArrangement                      = true
-        filterStackView.layoutMargins                                           = UIEdgeInsets(top: 2, left: 0, bottom: 2, right: 0)
-        
         return button
     }
     
@@ -167,6 +163,10 @@ class HomeView: UIView {
             button.tag = index
             button.addTarget(self, action: #selector(filterButtonTapped(_:)), for: .touchUpInside)
             filterStackView.addArrangedSubview(button)
+            
+            if category.name == "Alimentação" {
+                updateButtonSelection(button: button)
+            }
         }
         
     }
@@ -209,10 +209,10 @@ class HomeView: UIView {
     
     private func configureConstraints() {
         NSLayoutConstraint.activate([
-            filterScrollView.topAnchor.constraint(equalTo: topAnchor, constant: 48),
+            filterScrollView.topAnchor.constraint(equalTo: topAnchor, constant: 80),
             filterScrollView.leadingAnchor.constraint(equalTo: leadingAnchor, constant: 24),
             filterScrollView.trailingAnchor.constraint(equalTo: trailingAnchor),
-            filterScrollView.heightAnchor.constraint(equalToConstant: 86),
+            filterScrollView.heightAnchor.constraint(equalTo: filterStackView.heightAnchor),
             
             mapView.topAnchor.constraint(equalTo: self.topAnchor),
             mapView.leadingAnchor.constraint(equalTo: self.leadingAnchor),
@@ -226,7 +226,7 @@ class HomeView: UIView {
             filterStackView.topAnchor.constraint(equalTo: filterScrollView.topAnchor),
             filterStackView.leadingAnchor.constraint(equalTo: filterScrollView.leadingAnchor),
             filterStackView.bottomAnchor.constraint(equalTo: filterScrollView.bottomAnchor),
-            filterStackView.heightAnchor.constraint(equalTo: filterScrollView.heightAnchor),
+            filterStackView.heightAnchor.constraint(equalToConstant: 40 ),
             filterStackView.trailingAnchor.constraint(equalTo: filterScrollView.trailingAnchor),
 
         ])
