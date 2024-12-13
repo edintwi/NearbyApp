@@ -155,7 +155,7 @@ class HomeView: UIView {
             "Compras"           : "cart",
             "Hospedagem"        : "bed.double",
             "Padaria"           : "cup.and.saucer",
-            "Cinema"            : "tv"
+            "Cinema"            : "tv.fill"
         ]
         
         self.categories         = categories
